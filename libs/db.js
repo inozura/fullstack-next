@@ -1,7 +1,9 @@
+const path = require("path");
+
 var knex = require("knex")({
   client: "sqlite3",
   connection: {
-    filename: "./db-jobs.sqlite",
+    filename: path.resolve("./db-jobs.sqlite"),
   },
   useNullAsDefault: true,
   // connection: {
@@ -14,5 +16,7 @@ var knex = require("knex")({
 
 // knex("users").insert([{ email: "" }, { password: "" }]);
 // knex("posts").insert([{ title: "" }, { content: "" }]);
+
+// console.log("log", path.resolve("./db-jobs.sqlite"));
 
 export default knex;
