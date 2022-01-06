@@ -6,11 +6,11 @@ import ResponsiveAppBar from "../components/Navbar";
 import Link from "next/link";
 import { authPage } from "../middlewares/authorizationPage";
 import styles from "../styles/Home.module.css";
-
+import { server } from "../config";
 export async function getServerSideProps(ctx) {
   // const { token } = await authPage(ctx);
 
-  const postReq = await fetch("http://localhost:3000/api/posts");
+  const postReq = await fetch(server + "/api/posts");
 
   const posts = await postReq.json();
 

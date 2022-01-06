@@ -4,13 +4,14 @@ import Router from "next/router";
 import Nav from "../../../components/Nav";
 import { Card, Stack, TextField } from "@mui/material";
 import { LoadingButton } from "@mui/lab";
+import { server } from "../../config";
 
 export async function getServerSideProps(ctx) {
   const { token } = await authPage(ctx);
 
   const { id } = ctx.query;
 
-  const postReq = await fetch("http://localhost:3000/api/posts/detail/" + id, {
+  const postReq = await fetch(server + "/api/posts/detail/" + id, {
     headers: {
       Authorization: "Bearer " + token,
     },

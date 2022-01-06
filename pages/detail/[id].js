@@ -3,12 +3,13 @@ import Stack from "@mui/material/Stack";
 import Card from "@mui/material/Card";
 import Typhograhpy from "@mui/material/Typography";
 import ResponsiveAppBar from "../../components/Navbar";
+import { server } from "../../config";
 
 export async function getServerSideProps(ctx) {
   // const { token } = await authPage(ctx);
   const { id } = ctx.query;
 
-  const detailReq = await fetch("http://localhost:3000/api/posts/detail/" + id);
+  const detailReq = await fetch(server + "/api/posts/detail/" + id);
 
   const posts = await detailReq.json();
 
