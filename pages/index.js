@@ -1,66 +1,60 @@
-import Head from 'next/head'
-import styles from '../styles/Home.module.css'
+import { Card, Grid, Stack, Typography } from "@mui/material";
+import Head from "next/head";
+import { useState } from "react";
+import MyAvatar from "../components/MyAvatar";
+import ResponsiveAppBar from "../components/Navbar";
+import Link from "next/link";
+import { authPage } from "../middlewares/authorizationPage";
+import styles from "../styles/Home.module.css";
 
-export default function Home() {
+export async function getServerSideProps(ctx) {
+  // const { token } = await authPage(ctx);
+
+  const postReq = await fetch("http://localhost:3000/api/posts");
+
+  const posts = await postReq.json();
+
+  return {
+    props: {
+      posts: posts.data,
+    },
+  };
+}
+
+export default function Home(props) {
+  const [posts, setPosts] = useState(props.posts);
+
   return (
-    <div className={styles.container}>
-      <Head>
-        <title>Create Next App</title>
-        <link rel="icon" href="/favicon.ico" />
-      </Head>
-
-      <main className={styles.main}>
-        <h1 className={styles.title}>
-          Selamat datang <a href="https://nextjs.org">Next.js!</a>
-        </h1>
-
-        <p className={styles.description}>
-          Get started by editing{' '}
-          <code className={styles.code}>pages/index.js</code>
-        </p>
-
-        <div className={styles.grid}>
-          <a href="https://nextjs.org/docs" className={styles.card}>
-            <h3>Documentation &rarr;</h3>
-            <p>Find in-depth information about Next.js features and API.</p>
-          </a>
-
-          <a href="https://nextjs.org/learn" className={styles.card}>
-            <h3>Learn &rarr;</h3>
-            <p>Learn about Next.js in an interactive course with quizzes!</p>
-          </a>
-
-          <a
-            href="https://github.com/vercel/next.js/tree/master/examples"
-            className={styles.card}
-          >
-            <h3>Examples &rarr;</h3>
-            <p>Discover and deploy boilerplate example Next.js projects.</p>
-          </a>
-
-          <a
-            href="https://vercel.com/import?filter=next.js&utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-            className={styles.card}
-          >
-            <h3>Deploy &rarr;</h3>
-            <p>
-              Instantly deploy your Next.js site to a public URL with Vercel.
-            </p>
-          </a>
-        </div>
-      </main>
-
-      <footer className={styles.footer}>
-        <a
-          href="https://vercel.com?utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
+    <div style={styles}>
+      <ResponsiveAppBar />
+      <br />
+      <Stack sx={{ padding: 2 }}>
+        <Grid
+          container
+          spacing={{ xs: 2, md: 3 }}
+          columns={{ xs: 4, sm: 8, md: 12 }}
         >
-          Powered by{' '}
-          <img src="/vercel.svg" alt="Vercel Logo" className={styles.logo} />
-          <span style={{ fontSize: '5px' }}>@rzl</span>
-        </a>
-      </footer>
+          {posts?.map((post) => (
+            <Grid spacing={2} item xs={2} sm={4} md={4} key={post.id}>
+              <Link href={`/detail/${post.id}`}>
+                <Card sx={{ padding: "10px 18px", cursor: "pointer" }}>
+                  <Stack direction="row" alignItems="center">
+                    <MyAvatar name={post.title} />
+                    <Stack
+                      justifyContent="unset"
+                      alignItems="unset"
+                      sx={{ ml: 2 }}
+                    >
+                      <Typography variant="h5">{post.title}</Typography>
+                      <span>{post.content}</span>
+                    </Stack>
+                  </Stack>
+                </Card>
+              </Link>
+            </Grid>
+          ))}
+        </Grid>
+      </Stack>
     </div>
-  )
+  );
 }

@@ -4,27 +4,28 @@ import authorization from "../../../middlewares/authorization";
 export default async function handler(req, res) {
   if (req.method !== "POST") return res.status(405).end();
 
+  // middleware auth
   const auth = await authorization(req, res);
 
   const { title, content } = req.body;
 
   try {
-    const create = await db("posts").insert({
+    const create = await db("jobs").insert({
       title,
       content,
     });
 
-    const createdData = await db("posts").where("id", create).first();
+    const createdData = await db("jobs").where("id", create).first();
 
     res.status(200);
     res.json({
-      message: "Post created successfully",
+      message: "Jobs created successfully",
       data: createdData,
     });
   } catch (error) {
     res.status(500);
     res.json({
-      message: "Server error",
+      message: "Jobs created successfully",
       data: error,
     });
   }

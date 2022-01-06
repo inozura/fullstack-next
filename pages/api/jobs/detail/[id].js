@@ -6,17 +6,17 @@ export default async function handler(req, res) {
 
   const { id } = req.query;
 
-  // const auth = await authorization(req, res);
+  const auth = await authorization(req, res);
 
   try {
-    const post = await db("posts").where({ id }).first();
+    const job = await db("jobs").where({ id }).first();
 
-    if (!post) return res.status(404).end();
+    if (!job) return res.status(404).end();
 
     res.status(200);
     res.json({
-      message: "Posts data",
-      data: post,
+      message: "Jobs data",
+      data: job,
     });
   } catch (error) {
     res.status(500);

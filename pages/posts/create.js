@@ -1,89 +1,103 @@
-import React, { useState } from 'react';
-import { authPage } from '../../middlewares/authorizationPage';
-import Router from 'next/router';
-import Nav from '../../components/Nav';
+import React, { useState } from "react";
+import { authPage } from "../../middlewares/authorizationPage";
+import Router from "next/router";
+import Nav from "../../components/Nav";
+import { Card, Stack, TextField } from "@mui/material";
+import { LoadingButton } from "@mui/lab";
 
 export async function getServerSideProps(ctx) {
-    const { token } = await authPage(ctx);
+  const { token } = await authPage(ctx);
 
-    return {
-        props: {
-            token
-        }
-    }
+  return {
+    props: {
+      token,
+    },
+  };
 }
 
 export default function PostCreate(props) {
-    const [ fields, setFields ] = useState({
-        title: '',
-        content: ''
+  const [fields, setFields] = useState({
+    title: "",
+    content: "",
+  });
+
+  const [status, setStatus] = useState("normal");
+
+  async function createHandler(e) {
+    e.preventDefault();
+
+    setStatus("loading");
+
+    const { token } = props;
+
+    const create = await fetch("/api/posts/create", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: "Bearer " + token,
+      },
+      body: JSON.stringify(fields),
     });
 
-    const [ status, setStatus ] = useState('normal');
+    if (!create.ok) return setStatus("error");
 
-    async function createHandler(e) {
-        e.preventDefault();
-    
-        setStatus('loading');
+    const res = await create.json();
 
-        const { token } = props;
+    setStatus("success");
 
-        const create = await fetch('/api/posts/create', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': 'Bearer ' + token
-            },
-            body: JSON.stringify(fields)
-        });
+    Router.push("/posts");
+  }
 
-        if(!create.ok) return setStatus('error');
+  function fieldHandler(e) {
+    const name = e.target.getAttribute("name");
 
-        const res = await create.json();
+    setFields({
+      ...fields,
+      [name]: e.target.value,
+    });
+  }
 
-        setStatus('success');
+  return (
+    <>
+      <Nav />
 
-        Router.push('/posts');
-    }
-
-    function fieldHandler(e) {
-        const name = e.target.getAttribute('name');
-       
-        setFields({
-            ...fields,
-            [name]: e.target.value
-        });
-    }
-
-    return (
-        <div>
-            <h1>Create a Post</h1>
-
-            <Nav />
-
+      <Stack justifyContent="center" alignItems="center" sx={{ mt: 3 }}>
+        <Card sx={{ width: "50%", padding: 2 }}>
+          <Stack justifyContent="center" alignItems="center">
             <form onSubmit={createHandler.bind(this)}>
-               <input
-                    onChange={fieldHandler.bind(this)}
-                    type="text" 
-                    placeholder="Title" 
-                    name="title" 
+              <Stack spacing={3}>
+                <TextField
+                  onChange={fieldHandler.bind(this)}
+                  type="text"
+                  placeholder="Title"
+                  name="title"
                 />
-                <br />
-                <textarea
-                    onChange={fieldHandler.bind(this)}
-                    placeholder="Content" 
-                    name="content" 
-                ></textarea>
-                <br />
-                
-                <button type="submit">
-                    Create Post
-                </button>
+              </Stack>
+              <br />
+              <Stack spacing={2}>
+                <TextField
+                  onChange={fieldHandler.bind(this)}
+                  placeholder="Content"
+                  name="content"
+                  multiline
+                  minRows={5}
+                />
+              </Stack>
+              <br />
 
-                <div>
-                    Status: {status}
-                </div>
+              <Stack>
+                <LoadingButton
+                  type="submit"
+                  loading={status === "loading"}
+                  variant="outlined"
+                >
+                  Create Post
+                </LoadingButton>
+              </Stack>
             </form>
-        </div>
-    );
+          </Stack>
+        </Card>
+      </Stack>
+    </>
+  );
 }

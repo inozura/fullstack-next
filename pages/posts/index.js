@@ -1,78 +1,99 @@
-import React, { useState } from 'react';
-import { authPage } from '../../middlewares/authorizationPage';
-import Router from 'next/router';
-import Nav from '../../components/Nav';
+import React, { useState } from "react";
+import { authPage } from "../../middlewares/authorizationPage";
+import Router from "next/router";
+import Nav from "../../components/Nav";
+import { Avatar, Card, Grid, Stack, Typography } from "@mui/material";
+import MyAvatar from "../../components/MyAvatar";
 
 export async function getServerSideProps(ctx) {
-    const { token } = await authPage(ctx);
+  const { token } = await authPage(ctx);
 
-    const postReq = await fetch('http://localhost:3000/api/posts', {
-        headers: {
-            'Authorization': 'Bearer ' + token
-        }
-    });
+  const postReq = await fetch("http://localhost:3000/api/posts", {
+    headers: {
+      Authorization: "Bearer " + token,
+    },
+  });
 
-    const posts = await postReq.json();
+  const posts = await postReq.json();
 
-    return { 
-        props: {
-            token,
-            posts: posts.data
-        }
-    }
+  return {
+    props: {
+      token,
+      posts: posts.data,
+    },
+  };
 }
 
 export default function PostIndex(props) {
-    const [posts, setPosts] = useState(props.posts);
+  const [posts, setPosts] = useState(props.posts);
 
-    async function deleteHandler(id, e) {
-        e.preventDefault();
+  async function deleteHandler(id, e) {
+    e.preventDefault();
 
-        const { token } = props;
+    const { token } = props;
 
-        const ask = confirm('Apakah data ini akan dihapus?');
+    const ask = confirm("Apakah data ini akan dihapus?");
 
-        if(ask) {
-            const deletePost = await fetch('/api/posts/delete/' + id, {
-                method: 'DELETE',
-                headers: {
-                    'Authorization': 'Bearer ' + token
-                }
-            });
+    if (ask) {
+      const deletePost = await fetch("/api/posts/delete/" + id, {
+        method: "DELETE",
+        headers: {
+          Authorization: "Bearer " + token,
+        },
+      });
 
-            const res = await deletePost.json();
+      const res = await deletePost.json();
 
-            const postsFiltered = posts.filter(post => {
-                return post.id !== id && post;
-            });
+      const postsFiltered = posts.filter((post) => {
+        return post.id !== id && post;
+      });
 
-            setPosts(postsFiltered);
-        } 
+      setPosts(postsFiltered);
     }
+  }
 
-    function editHandler(id) {
-        Router.push('/posts/edit/' + id);
-    }
+  function editHandler(id) {
+    Router.push("/posts/edit/" + id);
+  }
 
-    return (
-        <div>
-            <h1>Posts</h1>
+  return (
+    <>
+      <Nav />
+      <br />
+      <Stack sx={{ padding: "10px 13px" }}>
+        <Grid
+          container
+          spacing={{ xs: 2, md: 3 }}
+          columns={{ xs: 4, sm: 8, md: 12 }}
+        >
+          {posts?.map((post) => (
+            <Grid spacing={2} item xs={2} sm={4} md={4} key={post.id}>
+              <Card sx={{ padding: "10px 18px" }}>
+                <Stack direction="row" alignItems="center">
+                  <MyAvatar name={post.title} />
+                  <Stack
+                    justifyContent="unset"
+                    alignItems="unset"
+                    sx={{ ml: 2 }}
+                  >
+                    <Typography variant="h5">{post.title}</Typography>
+                    <span>{post.content}</span>
 
-            <Nav />
-            
-            { posts.map(post => (
-                <div key={post.id}>
-                    <h3>{ post.title }</h3> 
-                    <p>{ post.content }</p>
-                    
-                    <div>
-                        <button onClick={editHandler.bind(this, post.id)}>Edit</button>
-                        <button onClick={deleteHandler.bind(this, post.id)}>Delete</button>
-                    </div>
-                
-                    <hr />
-                </div>
-            ))}
-        </div>
-    );
+                    <Stack direction="row" sx={{ mt: 1 }}>
+                      <button onClick={editHandler.bind(this, post.id)}>
+                        Edit
+                      </button>
+                      <button onClick={deleteHandler.bind(this, post.id)}>
+                        Delete
+                      </button>
+                    </Stack>
+                  </Stack>
+                </Stack>
+              </Card>
+            </Grid>
+          ))}
+        </Grid>
+      </Stack>
+    </>
+  );
 }

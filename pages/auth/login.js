@@ -1,72 +1,106 @@
-import React, { useState, useEffect } from 'react';
-import Cookie from 'js-cookie';
-import Router from 'next/router';
-import { unauthPage } from '../../middlewares/authorizationPage';
-import Link from 'next/link';
+import React, { useState, useEffect } from "react";
+import Cookie from "js-cookie";
+import Router from "next/router";
+import { unauthPage } from "../../middlewares/authorizationPage";
+import Link from "next/link";
+import { Card, Stack, TextField, Typography } from "@mui/material";
+import { LoadingButton } from "@mui/lab";
 
 export async function getServerSideProps(ctx) {
-    await unauthPage(ctx);
+  await unauthPage(ctx);
 
-    return { props: {} }
+  return { props: {} };
 }
 
 export default function Login() {
-    const [fields, setFields] = useState({
-        email: '',
-        password: ''
+  const [fields, setFields] = useState({
+    email: "",
+    password: "",
+  });
+
+  const [status, setStatus] = useState("normal");
+
+  async function loginHandler(e) {
+    e.preventDefault();
+
+    setStatus("loading");
+
+    const loginReq = await fetch("/api/auth/login", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(fields),
     });
 
-    const [status, setStatus] = useState('normal');
+    if (!loginReq.ok) return setStatus("error " + loginReq.status);
 
-    async function loginHandler(e) {
-        e.preventDefault();
-        
-        setStatus('loading');
+    const loginRes = await loginReq.json();
 
-        const loginReq = await fetch('/api/auth/login', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(fields)
-        });
+    setStatus("success");
 
-        if(!loginReq.ok) return setStatus('error ' + loginReq.status);
+    Cookie.set("token", loginRes.token);
 
-        const loginRes = await loginReq.json();
+    Router.push("/posts");
+  }
 
-        setStatus('success');
+  function fieldHandler(e) {
+    const name = e.target.getAttribute("name");
 
-        Cookie.set('token', loginRes.token);
+    setFields({
+      ...fields,
+      [name]: e.target.value,
+    });
+  }
 
-        Router.push('/posts');
-    }
+  return (
+    <div
+      style={{
+        height: "100vh",
+        width: "100%",
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
+      }}
+    >
+      <Card sx={{ width: 320, padding: 3 }}>
+        <Typography variant="h4">Login</Typography>
 
-    function fieldHandler(e) {
-        const name = e.target.getAttribute('name');
+        <form onSubmit={loginHandler.bind(this)}>
+          <Stack spacing={1} sx={{ mt: 1 }}>
+            <TextField
+              fullWidth
+              name="email"
+              onChange={fieldHandler.bind(this)}
+              type="text"
+              placeholder="Email"
+            />
+          </Stack>
+          <br />
+          <Stack spacing={1} sx={{ my: 1 }}>
+            <TextField
+              fullWidth
+              name="password"
+              onChange={fieldHandler.bind(this)}
+              type="password"
+              placeholder="Password"
+            />
+          </Stack>
+          <Stack justifyContent="space-between" flexDirection="row">
+            <LoadingButton
+              type="submit"
+              loading={status === "loading"}
+              variant="contained"
+            >
+              Login
+            </LoadingButton>
 
-        setFields({
-            ...fields,
-            [name]: e.target.value
-        });
-    }
-
-    return (
-        <div>
-            <h1>Login</h1>
-            
-            <form onSubmit={loginHandler.bind(this)}>
-                <input onChange={fieldHandler.bind(this)} type="text" name="email" placeholder="Email" />
-                <input onChange={fieldHandler.bind(this)} type="password" name="password" placeholder="Password" />
-
-                <button type="submit">
-                    Login
-                </button>
-
-                <div>Status: {status}</div>
-
-                <Link href="/auth/register"><a>Register</a></Link>
-            </form>
-        </div>
-    );
+            <Link href="/auth/register">
+              <a>Register</a>
+            </Link>
+          </Stack>
+        </form>
+      </Card>
+    </div>
+  );
 }

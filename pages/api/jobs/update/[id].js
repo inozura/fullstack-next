@@ -10,12 +10,12 @@ export default async function handler(req, res) {
   const { title, content } = req.body;
 
   try {
-    const update = await db("posts").where({ id }).update({
+    await db("jobs").where({ id }).update({
       title,
       content,
     });
 
-    const updatedData = await db("posts").where({ id }).first();
+    const updatedData = await db("jobs").where({ id }).first();
 
     res.status(200);
     res.json({
