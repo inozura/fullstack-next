@@ -45,8 +45,27 @@ export default function Home(props) {
                       alignItems="unset"
                       sx={{ ml: 2 }}
                     >
-                      <Typography variant="h5">{post.title}</Typography>
-                      <span>{post.content}</span>
+                      <Typography
+                        variant="h5"
+                        sx={{
+                          display: "-webkit-box",
+                          overflow: "hidden",
+                          WebkitBoxOrient: "vertical",
+                          WebkitLineClamp: 1,
+                        }}
+                      >
+                        {post.title}
+                      </Typography>
+                      <span
+                        style={{
+                          display: "-webkit-box",
+                          overflow: "hidden",
+                          WebkitBoxOrient: "vertical",
+                          WebkitLineClamp: 2,
+                        }}
+                      >
+                        {post.content}
+                      </span>
                     </Stack>
                   </Stack>
                 </Card>
