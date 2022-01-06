@@ -4,7 +4,7 @@ import Router from "next/router";
 import Nav from "../../../components/Nav";
 import { Card, Stack, TextField } from "@mui/material";
 import { LoadingButton } from "@mui/lab";
-import { server } from "../../config";
+import { server } from "../../../config";
 
 export async function getServerSideProps(ctx) {
   const { token } = await authPage(ctx);
